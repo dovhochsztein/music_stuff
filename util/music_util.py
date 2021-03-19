@@ -1,7 +1,11 @@
 import pygame
 import base64
+from settings import SETTINGS
+import os
+from mido import MidiFile
 
-def play_music(midi_file):
+
+def play_midi_file(midi_file):
     """
     stream music with mixer.music module in blocking manner
     this will stream the sound from disk while playing
@@ -35,6 +39,27 @@ def play_music(midi_file):
         return
 
 
+def play_music(obj, name='temp.midi'):
+    temp_file_path = os.path.join(SETTINGS.TEMP_DIR, name)
+    temp_written_success = False
+    try:
+        if isinstance(obj, str):
+            write_mid64_to_midi(obj, temp_file_path)
+            temp_written_success = False
+        elif isinstance(obj, MidiFile):
+            obj.save(temp_file_path)
+            temp_written_success = False
+    except:
+        print('midi save failed')
+
+    try:
+        play_midi_file(temp_file_path)
+    except:
+        pass
+    finally:
+        os.remove(temp_file_path)
+
+
 def write_mid64_to_midi(mid64, filepath):
     output = base64.b64decode(mid64)
     fout = open(filepath, "wb")
@@ -42,5 +67,5 @@ def write_mid64_to_midi(mid64, filepath):
     fout.close()
 
 
-def read_midi_to_mid64(filepath):
-    return base64.encodebytes(open(filepath, 'rb').read())
+def read_midi_to_mid64(file_path):
+    return base64.encodebytes(open(file_path, 'rb').read())
