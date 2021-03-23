@@ -1,5 +1,7 @@
 from util.music_util import play_music, write_mid64_to_midi
+from util.notes_util import sharp_note_dict, reduce_note, full_note_name
 from mido import MidiFile, MidiTrack, open_output, tick2second
+import matplotlib.ticker as plticker
 from mido.messages.messages import Message
 from mido.midifiles.meta import MetaMessage
 from music_data.music_data import FishPolka_mid64
@@ -7,13 +9,14 @@ from settings import SETTINGS
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+from pylab import *
 
 
-midi_file = 'temp.midi'
-
-write_mid64_to_midi(FishPolka_mid64, midi_file)
-
-play_music(midi_file)
+# midi_file = 'temp.midi'
+#
+# write_mid64_to_midi(FishPolka_mid64, midi_file)
+#
+# play_music(midi_file)
 
 input_midi = MidiFile('temp.midi')
 
@@ -21,9 +24,9 @@ message_list = list(input_midi)
 
 play_music(input_midi)
 
-input_midi.save('temp.midi')
+# input_midi.save('temp.midi')
 
-message_list = input_midi.tracks[4].messages
+# message_list = input_midi.tracks[4].messages
 
 message_1 = input_midi.tracks[5][8]
 
@@ -85,5 +88,15 @@ def visualize_time_series(time_series):
         for note in item:
             x.append(ii)
             y.append((note))
-    plt.figure()
-    plt.scatter(x,y)
+    axes = figure().add_subplot(111)
+    axes.scatter(x,y)
+
+    loc = plticker.MultipleLocator(base=1.0)  # this locator puts ticks at regular intervals
+    axes.yaxis.set_major_locator(loc)
+    a = axes.get_yticks().tolist()
+    b = [full_note_name(ii, sharp_note_dict) for ii in a]
+    axes.set_yticklabels(b)
+
+
+
+visualize_time_series(convert_track_to_time_series(track = input_midi.tracks[4]))
